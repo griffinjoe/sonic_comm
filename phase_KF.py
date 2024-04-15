@@ -32,7 +32,7 @@ for t_idx in np.arange(time.shape[0]):
 	# Each observation should be a phase measurement from the model's nearest point
 	#	to the measured constellation symbol.  The constellation has four points,
 	#	so the nearest point is never more than pi/8 radians away.
-	obs = np.mod(phi - model_predict[0], np.pi / 4) - np.pi / 8
+	obs = np.mod(phi - model_predict[0], np.pi / 2) - np.pi / 4
 	model_state = update_phase_model(obs, model_predict, update_matrix, obs_matrix,
 									 process_noise_cov, obs_noise_cov)
 	align_phasor = np.exp(-1j * model_state[0])
