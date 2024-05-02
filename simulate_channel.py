@@ -5,10 +5,10 @@ from modulate import np, plt, Es, Fs, Fsym, cplx_mod, pulse, Fc
 
 time = np.arange(cplx_mod.shape[0]) / Fs
 SSNR_dB = 30 # Symbol Signal to Noise Ratio, dB
-phase_offset = -2 * np.pi / 12 # rad
-phase_rate = 2 * np.pi / 80 # rad / s
+phase_offset = 0#-2 * np.pi / 12 # rad
+phase_rate = 0#2 * np.pi / 80 # rad / s
 # Channel fade indicates phase rate direction with spiral direction
-fade_rate = 0.9 # loss / s
+fade_rate = 1#0.9 # loss / s
 
 SSNR = np.power(10, SSNR_dB / 10) # Linear scale, unitless
 No = Es / SSNR # V^2 or Pa^2, noise energy per symbol
