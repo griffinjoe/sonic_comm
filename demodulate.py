@@ -18,5 +18,8 @@ symbol_outputs = matched[symbol_offset::pulse.shape[0]]
 # Matched filtering fails if we have significant phase drift within a symbol period
 # Assuming small phase drift, we can produce a constellation plot
 plt.plot(np.real(symbol_outputs), np.imag(symbol_outputs), '.')
+plt.title("Raw Demodulated Constellation Points")
+plt.xlabel("Real")
+plt.ylabel("Imaginary")
 plt.grid(True)
 plt.show()

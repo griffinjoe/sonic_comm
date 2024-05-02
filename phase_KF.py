@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
 	# Plot the constellation after phase KF corrects the phase output
 	plt.plot(np.real(phase_aligned), np.imag(phase_aligned), '.')
-	plt.title('Aligned Constellation Points')
+	plt.title('Phase KF Aligned Constellation Points')
 	plt.xlabel('Real')
 	plt.ylabel('Imaginary')
 	plt.grid(True)
