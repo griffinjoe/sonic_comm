@@ -5,29 +5,23 @@ from demodulate import np, plt, symbol_outputs, Fsym
 
 ################################### INITIALIZATIONS #################################
 
-# STATE DYNAMICS
-update_matrix = np.array([[1, 1], [0, 1]]) # Matrix A in Will'S notation
-obs_matrix = np.array([[1, 0]]) # Matrix B in Will'S Notation
-
-# NOISE DYNAMICS
-
-# Finding process noise covariance is a system identification problem
-process_noise_cov = np.diag([1, 1])
-
-# Finding observation noise covariance is another system identification problem
-# 	probably related to channel characterization: high-SNR channels will have low
-# 	symbol noise and therefore low phase observation noise.
-obs_noise_cov = np.array([[1]])  
-
-# ESTIMATORS 
+# Predictions 
 initial_shift = 0 # Initial value for phase offset
 initial_rate =  np.pi / 64 # Initial value for phase rate
 predicted_state = np.array([[initial_shift], [initial_rate]])
 # Using assumed covariance parameter as initial estimate
 predicted_covariance = np.diag([1, 1])
 
-# OTHER ALGEBRA
+# System Dynamics
+update_matrix = np.array([[1, 1], [0, 1]]) # Matrix A 
+obs_matrix = np.array([[1, 0]]) # Matrix B 
+process_noise_cov = np.diag([1, 1])
+obs_noise_cov = np.array([[1]])  
+# Finding observation noise covariance is another system identification problem
+# 	probably related to channel characterization: high-SNR channels will have low
+# 	symbol noise and therefore low phase observation noise.
 
+# Other Algebra
 # ID matrix gets used in update for covariance estimate; defining
 #	it here saves some clutter later.
 id = np.identity(predicted_covariance.shape[0]) 
@@ -39,14 +33,14 @@ id = np.identity(predicted_covariance.shape[0])
 - Changes global predictions in place. 
 
 Inputs:
-phi (np.ndarray): Demodulator's estimated phase shift
+obs (np.ndarray): Demodulator's estimated phase shift
 
 Returns:
 NULL
 '''
 def KF_Process(phi):
 	
-	# Scope handling
+	# Python Scope Alignment
 	global predicted_state, predicted_covariance, obs_matrix, update_matrix, process_noise_cov, obs_noise_cov
 
 	# Prediction Step
