@@ -102,7 +102,7 @@ while ((ref2_idx - np.round(predicted_state)[0, 0]) < matched.shape[0]):
 
 	# Each observation should be a half-symbol measurement scaled by the difference
 	#	between preceding and following symbols.
-	obs = np.array([np.abs(matched[ref_half_idx])]) # Observe magnitude of adjusted half symbol
+	obs = np.array([np.abs(matched[ref_half_idx])]) # Observe magnitude of raw half symbol
 
 	# Observation noise covariance should be scaled when symbols are close together
 	# Repeated symbols don't give new info about timing alignment
