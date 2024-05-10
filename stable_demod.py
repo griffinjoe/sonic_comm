@@ -7,6 +7,13 @@ sps = int(Fs / Fsym)
 time = np.arange(channel_output.shape[0]) / Fs
 down_carrier = np.exp(2j * np.pi * (-Fc) * time)
 
+# Mix down to baseband
+bb = channel_output * down_carrier
+
+# Matched filter
+# Matched filter impulse response
+pulse_normd = np.array(pulse, dtype = complex) / np.linalg.norm(pulse, ord = 2)**2
+
 # Initialize the modem-state Kalman Filter, tracking phase and symbol alignment
 # At model_state = 0, symbol indices are (pulse_shape[0] - 1) + n * pulse.shape[0]
 align_shift = pulse.shape[0] - 1 # Reference point value, rad
@@ -28,26 +35,14 @@ process_noise_cov = np.diag([1e-4 / Fsym, 1e-3 / Fsym,
 obs_noise_cov = np.diag([1, 1, # Half-symbol variance, to be recomputed at runtime
 						 1e2]) # Phase variance, a function of SSNR
 
-# Define KF update operation function
-def update_KF_model(innov, predict, update_matrix, obs_matrix, process_noise_cov,
-					obs_noise_cov, predict_cov):
-	net_variance = obs_matrix @ predict_cov @ obs_matrix.T + obs_noise_cov
-	gain = predict_cov @ obs_matrix.T @ np.linalg.inv(net_variance)
-	model_weight = np.identity(predict.shape[0]) - gain @ obs_matrix
-	updated_state = predict + gain @ innov
-	updated_cov = (model_weight @ predict_cov @ model_weight.T + 
-				   gain @ obs_noise_cov @ gain.T)
-#	print('gain =\n', gain)
-#	print('updated_state =\n', updated_state.T)
-#	print('updated_cov =\n', updated_cov)
-	return (updated_state, updated_cov)
+model_idx = round(model_state[0, 0])
+ref1_idx = align_shift
+sym1_idx = ref1_idx - model_idx
+model_predict = update_matrix @ model_state
+predict_idx = round(model_predict[0, 0])
+ref2_idx = ref1_idx + align_rate
+sym2_idx = ref2_idx - predict_idx
 
-# Mix down to baseband
-bb = channel_output * down_carrier
-
-# Matched filter
-# Matched filter impulse response
-pulse_normd = np.array(pulse, dtype = complex) / np.linalg.norm(pulse, ord = 2)**2
 # Run only one symbol at a time through the matched filter
 # The incremental approach allows phase estimator to modify filter input
 # Modifiable input needs to be copied from bb to not accidentally also modify bb
@@ -56,13 +51,7 @@ mfilt_output = np.array([], dtype = complex)
 symbol_outputs = np.array([], dtype = complex)
 symbol_times = np.array([])
 mfilt = DTLTISystem(pulse_normd)
-model_idx = round(model_state[0, 0])
-ref1_idx = align_shift
-sym1_idx = ref1_idx - model_idx
-model_predict = update_matrix @ model_state
-predict_idx = round(model_predict[0, 0])
-ref2_idx = ref1_idx + align_rate
-sym2_idx = ref2_idx - predict_idx
+
 # Feed enough data to get first two symbols
 mfilt_output = np.append(mfilt_output,
 						 mfilt.append_input(mfilt_input[:sym2_idx + 1]))
@@ -88,13 +77,26 @@ model_predict[2, 0] = np.mod(np.angle(symbol_outputs[0]), np.pi / 2) - np.pi / 4
 state_memory = model_state.copy()
 innov_memory = np.zeros((3, 0))
 
+# Define KF update operation function
+def update_KF_model(innov, predict, update_matrix, obs_matrix, process_noise_cov,
+					obs_noise_cov, predict_cov):
+	net_variance = obs_matrix @ predict_cov @ obs_matrix.T + obs_noise_cov
+	gain = predict_cov @ obs_matrix.T @ np.linalg.inv(net_variance)
+	model_weight = np.identity(predict.shape[0]) - gain @ obs_matrix
+	updated_state = predict + gain @ innov
+	updated_cov = (model_weight @ predict_cov @ model_weight.T + 
+				   gain @ obs_noise_cov @ gain.T)
+	return (updated_state, updated_cov)
+
 # Run Kalman Filter loop until no more input waveform is available
 while sym2_idx < mfilt_input.shape[0]:
+
 	symbol_outputs = np.append(symbol_outputs, mfilt_output[sym2_idx])
 	symbol_times = np.append(symbol_times, sym2_idx / Fs)
 	half_idx = round((sym1_idx + sym2_idx) / 2)
 	half_sym = mfilt_output[half_idx]
 	sym_diff = (symbol_outputs[-1] - symbol_outputs[-2]) / 2
+
 	model_predict = update_matrix @ model_state
 	predict_cov = update_matrix @ model_cov @ update_matrix.T + process_noise_cov
 	# Each observation should be a half-symbol measurement scaled by the difference
@@ -114,6 +116,7 @@ while sym2_idx < mfilt_input.shape[0]:
 											   update_matrix, obs_matrix,
 											   process_noise_cov, obs_noise_cov,
 											   predict_cov)
+	
 	ref1_idx = ref2_idx
 	ref2_idx = ref2_idx + align_rate
 	sym1_idx = sym2_idx
@@ -132,6 +135,8 @@ while sym2_idx < mfilt_input.shape[0]:
 #		scale_filt.append_input(recycle_input)
 #	scale = scale_filt.append_input(np.real(np.abs(symbol_outputs[-1:]))) / np.sqrt(2)
 #	scale_memory = np.append(scale_memory, scale)
+
+# Frequency mismatch correction between matched filter input and matched filter itself
 	mfilt_input[sym1_idx+1:sym2_idx+1] = (mfilt_input[sym1_idx+1:sym2_idx+1] *
 										  input_phasor)# / scale[-1]
 	mfilt_output = np.append(mfilt_output,

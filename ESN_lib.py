@@ -134,7 +134,7 @@ class DTStateSpace(DTLTISystem):
             
     Methods 
         * set_input()
-            hard copy of hte input sequence
+            hard copy of the input sequence
 
     
     '''

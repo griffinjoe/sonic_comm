@@ -1,6 +1,6 @@
 # Run mod, sim channel, demod for required variables
 # Import numpy and pyplot from demodulate so library code isn't rerun
-from demodulate import np, plt, symbol_outputs, Fs, Fsym#, phase_offset, phase_rate
+from demodulate import np, plt, symbol_outputs, Fs, Fsym # phase_offset, phase_rate
 
 state_memory = np.zeros((2, symbol_outputs.shape[0]))
 

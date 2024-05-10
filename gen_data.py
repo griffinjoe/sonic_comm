@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import binascii
 
-M = 4
+M = 4 
 bitcount = 1000 # bits
 assert(bitcount % np.log2(M) == 0)
 preamble_len = 200
@@ -32,7 +32,7 @@ cw_cnt = (bitcount - preamble_len) / (ASM.shape[1] + n)
 msg_blk = np.random.randint(0, 2, (k, 2 * int(cw_cnt / 2)))
 byte_blk = np.array(np.reshape(msg_blk.T, (-1, 8)), dtype = str)
 dec_list = [int(''.join(byte_row), 2) for byte_row in byte_blk]
-print(''.join(list(map(chr, dec_list))))
+print(''.join(list(map(chr, dec_list)))) # Binary to character string
 
 #msg_string = '''You should not complete the 6.3010 course evaluation.'''
 #bytelist = list(map(ord, msg_string))
@@ -45,4 +45,5 @@ asm_blk = ASM.T @ np.ones((1, msg_blk.shape[1]))
 frm_blk = np.concatenate((asm_blk, cw_blk), axis = 0)
 datastream = np.array(np.reshape(frm_blk.T, (-1,)), dtype = int)
 bitstream = np.concatenate((preamble, datastream))
-print('Symbol_count =\n', len(bitstream) / 2)
+print('SIMULATION PARAMETERS')
+print('Symbol_count:', len(bitstream) / 2)
