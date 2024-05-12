@@ -11,7 +11,7 @@ sps = int(Fs / Fsym) # Samples Per Symbol
 align_rate = 1 # samples lost per symbol
 align_offset = 0 # samples, mod rate-shifted symbol width
 phase_offset = 0 # rad
-phase_rate_per_sym = 0 # rad / sym
+phase_rate_per_sym = .05 # rad / sym
 phase_rate = phase_rate_per_sym * Fsym # rad / s
 
 # Reports to User
@@ -55,6 +55,7 @@ pulse_shifted = np.concatenate((rate_shifted[align_offset:],
 time = np.arange(pulse_shifted.shape[0]) / Fs
 phase = phase_offset + phase_rate * time 
 phasor = np.exp(1j * phase)
+
 ################################### CARRIER MODULATION ###################################
 
 # Modulate up to carrier frequency

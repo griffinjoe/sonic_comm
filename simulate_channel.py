@@ -26,12 +26,12 @@ noise = noise_amps * noise_phasors
 # Apply channel phasor
 # Intentional double phase offset?
 time = np.arange(cplx_mod.shape[0]) / Fs # s
-phase = phase_offset + phase_rate * time
-phasor = np.exp(1j * phase)
+# phase = phase_offset + phase_rate * time
+# phasor = np.exp(1j * phase)
 
 fade = attenuation * np.power(fade_rate, time)
 #channel_output = np.real(noise) + np.imag(noise) + 2 * tx_real * fade * phasor
-channel_output = noise + cplx_mod * fade * phasor
+channel_output = noise + cplx_mod * fade 
 
 ################################### PLOTTING ###################################
 fig, axs = plt.subplots(1, 1, figsize=(10, 12))  

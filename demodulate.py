@@ -1,3 +1,10 @@
+'''
+WARNING: demodulate is currently a suboptimal implementation of square filtering.
+Demodulate is now handled by Will's KF or stable_demod (both work). 
+Will's KF will pull from this library to demo a naive application of the matched
+filter. 
+'''
+
 ################################### IMPORTS/CONFIGS ###################################
 # Run modulate and simulate_channel for required variables
 # Import numpy and pyplot from simulate_channel so library code isn't rerun
@@ -39,7 +46,7 @@ axs[0].grid(True)
 axs[1].plot(np.real(matched), label='Real Matched Baseband', color='green')
 axs[1].plot(np.imag(matched), label='Imaginary Matched Baseband', color='orange')
 axs[1].scatter(np.arange(symbol_offset, len(matched), sps), np.real(matched)[symbol_offset::sps], color='darkred', label='Sampled Symbols', marker='o')
-axs[1].set_title('Filtered Baseband and Raw Symbol Sampling')
+axs[1].set_title('Match Filtered Baseband and Sampling (No KF)')
 axs[1].set_xlabel('Sample Index')
 axs[1].set_ylabel('Amplitude')
 axs[1].legend()

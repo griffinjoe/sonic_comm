@@ -55,6 +55,7 @@ mfilt = DTLTISystem(pulse_normd)
 # Feed enough data to get first two symbols
 mfilt_output = np.append(mfilt_output,
 						 mfilt.append_input(mfilt_input[:sym2_idx + 1]))
+
 # Monitor input length to prevent overflow
 if mfilt.input_seq.shape[0] >= N_VeryLong:
 	# Drop all memory of inputs too old for matched filter length
@@ -111,6 +112,7 @@ while sym2_idx < mfilt_input.shape[0]:
 	# Use observation noise covariance to skip updates missing symbol transitions
 	trust = np.array([np.real(sym_diff), np.imag(sym_diff)])**2
 	obs_noise_cov = np.diag(np.append(1e2 / np.maximum(trust, 1e-30), 1e2))
+
 #	print('obs_noise_cov =\n', obs_noise_cov)
 	(model_state, model_cov) = update_KF_model(innovation, model_predict, 
 											   update_matrix, obs_matrix,
@@ -129,14 +131,8 @@ while sym2_idx < mfilt_input.shape[0]:
 	sample_times = np.arange(sym2_idx - sym1_idx) / (sym2_idx - sym1_idx)
 	input_phasor = np.exp(-2j * np.pi * model_state[3, 0] * sample_times
 						  - 1j * model_state[2, 0])
-#	if scale_filt.input_seq.shape[0] >= N_VeryLong:
-#		scale_filt.reset()
-#		recycle_input = scale_filt.input_seq[-scale_filt.h.shape[0]:].copy()
-#		scale_filt.append_input(recycle_input)
-#	scale = scale_filt.append_input(np.real(np.abs(symbol_outputs[-1:]))) / np.sqrt(2)
-#	scale_memory = np.append(scale_memory, scale)
 
-# Frequency mismatch correction between matched filter input and matched filter itself
+    # Frequency mismatch correction between matched filter input and matched filter itself
 	mfilt_input[sym1_idx+1:sym2_idx+1] = (mfilt_input[sym1_idx+1:sym2_idx+1] *
 										  input_phasor)# / scale[-1]
 	mfilt_output = np.append(mfilt_output,
